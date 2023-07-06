@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from myTable import db, MyTable
+from myTable import db, CalculateGrams
 import MySQLdb
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3306/flask'
@@ -24,5 +25,29 @@ def create():
     db.session.commit()
 
     return jsonify({'message':'Success'}), 201
+
+@app.route('/calcu', methods=['POST'])
+def calcu():
+    grams = request.json.get('grams')
+
+    record = CalculateGrams(grams= grams * 2)
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify({'messsage':'Success'}), 201
+
+@app.route('/mytable-data', methods=['GET'])
+def getAllData():
+    records = MyTable.query.all()
+
+    result = []
+    for record in records:
+        result.append({
+            'id': record.id,
+            'name': record.name,
+            'email': record.email
+        })
+    return jsonify({'data': result})
+
 if __name__ == '__main__':
     app.run(debug=True)
